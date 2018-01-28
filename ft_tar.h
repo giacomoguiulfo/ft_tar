@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:49:19 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/27 18:51:33 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/27 19:18:15 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 # include <sys/stat.h>
 # include <unistd.h>
 # include <string.h>
+# include <stdlib.h>
+# include "libft.h"
 
 /*
 ** File Size: Pad with zeroes instead of spaces...1988 uses spaces. 
