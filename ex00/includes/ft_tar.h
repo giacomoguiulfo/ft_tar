@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/01/27 16:49:19 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 03:39:00 by asyed            ###   ########.fr       */
+/*   Created: 2018/01/28 05:05:32 by asyed             #+#    #+#             */
+/*   Updated: 2018/01/28 05:05:46 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,11 @@
 int	add_file(FILE *destfile, char *filename, t_dstr **prefix);
 
 /*
-** File Size: Pad with zeroes instead of spaces...1988 uses spaces. 
+** File Size: Pad with zeroes instead of spaces...1988 uses spaces.
 ** 	For historical reasons, a final NUL or space character should also be used.
-** 	Thus although there are 12 bytes reserved for storing the file size, 
+** 	Thus although there are 12 bytes reserved for storing the file size,
 ** 	only 11 octal digits can be stored.
-** 
+**
 */
 
 typedef struct	s_tarheader
