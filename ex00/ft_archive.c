@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   archive.c                                          :+:      :+:    :+:   */
+/*   ft_archive.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: suedadam <suedadam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:43:36 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 13:39:57 by suedadam         ###   ########.fr       */
+/*   Updated: 2018/01/28 15:54:00 by suedadam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,20 +23,19 @@ int	linkflag(t_tarheader **tar_h, struct stat buf)
 		(*tar_h)->linkflag = '4';
 	else if (S_ISCHR(buf.st_mode))
 		(*tar_h)->linkflag = '3';
-	// else if (S_ISIFO(buf.st_mode))
-	// 	(*tar_h)->linkflag = '6';
 	else if (S_ISREG(buf.st_mode))
 		(*tar_h)->linkflag = '0';
 	else if (S_ISDIR(buf.st_mode))
 	{
 		(*tar_h)->linkflag = '5';
-		snprintf((*tar_h)->size, 12, "%011o ", 0);
+		ft_suffixnull((*tar_h)->size, "%011llo ", 0, 12);
+		strcat((*tar_h)->name, "/");
 	}
 	else if (S_ISLNK(buf.st_mode))
 		(*tar_h)->linkflag = '2';
 	else
 	{
-		DBG("Failed linkflag()");
+		// DBG("Failed linkflag()");
 		return (0);
 	}
 	return (1);
@@ -81,21 +80,13 @@ int	add_stats(int fd, t_tarheader **tar_h)
 		return (0);
 	}
 	sprintf((*tar_h)->mode, "%06o ", (buf.st_mode & 0777));
-	DBG("Mode = %s", (*tar_h)->mode);
 	sprintf((*tar_h)->uid, "%06o ", buf.st_uid);
-	DBG("UID = %s", (*tar_h)->uid);
 	sprintf((*tar_h)->gid, "%06o ", buf.st_gid);
-	DBG("GID = %s", (*tar_h)->gid);
 	ft_suffixnull((*tar_h)->size, "%011llo ", buf.st_size, 12);
 	ft_suffixnull((*tar_h)->mtime, "%011lo ", buf.st_mtime, 12);
-	DBG("Size = \"%s\" vs %lld", (*tar_h)->size, buf.st_size);
-	DBG("mtime = %s", (*tar_h)->mtime);
 	strcpy((*tar_h)->indicator, "ustar");
-	DBG("");
 	memcpy((*tar_h)->version, "00", 2);
-	DBG("");
 	linkflag(tar_h, buf);
-	DBG("LinkFlag = %c", (*tar_h)->linkflag);
 	sprintf((*tar_h)->devicemajor, "%06o ", major(buf.st_rdev));
 	sprintf((*tar_h)->deviceminor, "%06o ", minor(buf.st_rdev));
 	tempstruct = getpwuid(buf.st_uid);
@@ -103,7 +94,6 @@ int	add_stats(int fd, t_tarheader **tar_h)
 	tempstruct = getgrgid(buf.st_gid);
 	sprintf((*tar_h)->gname, "%s", ((struct group *)tempstruct)->gr_name);
 	calc_chksum(tar_h);
-	DBG("CHKSUM = \"%s\"", (*tar_h)->checksum);
 	return (1);
 }
 
@@ -116,67 +106,49 @@ int	add_directory(FILE *destfile, char *filename, t_dstr **prefix)
 	if (!*prefix)
 	{
 		if (!(*prefix = calloc(sizeof(t_dstr), 1)))
-		{
-			DBG("Failed to calloc(prefix)");
 			return (0);
-		}
 		if (ft_dstr_new(*prefix, 20))
-		{
-			DBG("Failed to make the dynamic string!");
 			return (0);
-		}
-		// ft_dstr_append(prefix, filename);
-		DBG("Made prefix!");
-	}
-	else
-	{
-		DBG("Prefix already existed.");
 	}
 	new_name = calloc(sizeof(char), (*prefix)->len + ft_strlen(filename) + 1);
 	new_name = strcat(new_name, (*prefix)->data);
 	new_name = strcat(new_name, filename);
 	if (!(name = opendir(new_name)))
-	{
-		DBG("File = %s failed (%s)", new_name, strerror(errno));
 		return (0);
-	}
 	ft_dstr_append(*prefix, filename);
 	ft_dstr_append(*prefix, "/");
 	while ((dir = readdir(name)))
-	{
 		if (strcmp(dir->d_name, ".") && strcmp(dir->d_name, ".."))
-		{
-			DBG("add_file(%s)", dir->d_name);
 			if (!add_file(destfile, dir->d_name, prefix))
-				DBG("File = %s readdir(%s)", filename, strerror(errno));
-		}
-	}
+				return (0);
 	return (1);
 }
 
-int	write_file(FILE *destfile, FILE *src)
+int	write_file(FILE *destfile, FILE *src, t_tarheader *tar_h)
 {
-	size_t	size;
-	char	*buf;
+	size_t		size;
+	static char	pad[512];
+	char		size_buf[13];
+	char		*buf;
 
-	fseek(src, 0, SEEK_END);
-	size = ftell(src);
-	rewind(src);
-
-	if (!(buf = calloc(sizeof(char), size)))
-		return (0);
-	fread(buf, 1, size, src);
-	fwrite(buf, 1, size, destfile);
-	fclose(src);
-	free(buf);
-	// Padding
-	if (size > 512 && (size % 512))
+	strncpy(size_buf, tar_h->size, 11);
+	size = strtoul(size_buf, NULL, 8);
+	DBG("Size_buf = %s an size = %zd", size_buf, size);
+	if (size > 0)
 	{
-		size = size % 512;
 		if (!(buf = calloc(sizeof(char), size)))
 			return (0);
-		fwrite(buf, 1, size, destfile);
+		fread(buf, size, 1, src);
+		fwrite(buf, size, 1, destfile);
+		fclose(src);
 		free(buf);
+	}
+	// printf("Size = %zu", size);
+	if ((size > 512 && size % 512) || !size)
+	{
+		size = size % 512;
+		fwrite(pad, 512 - size, 1, destfile);
+		printf("Padded with %zu byts\n", 512 - size);
 	}
 	return (1);
 }
@@ -204,45 +176,36 @@ int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
 		new_name = calloc(sizeof(char), (*prefix)->len + ft_strlen(filename) + 1);
 		new_name = strcat(new_name, (*prefix)->data);
 		new_name = strcat(new_name, filename);
-		DBG("Prefix = %s for filename = %s", (*prefix)->data, new_name);
 	}
 	else
 		new_name = filename;
 	if (!strcpy(tar_h->name, new_name))
 	{
-		printf("Failed to copy name\n");
+		// DBG("Failed to copy name");
 		return (0);
 	}
 	if (!(file = fopen(new_name, "r")))
 	{
-		printf("Failed to open %s\n", new_name);
+		// DBG("Failed to open %s", new_name);
 		return (0);
 	}
-	else
-		printf("fd = %d\n", fileno(file));
 	if (!add_stats(fileno(file), &tar_h))
-	{
-		printf("Failed to add stats\n");
 		return (0);
-	}
-	// printf("FD: %d\n", fileno(file));
-	DBG("FD: %d %d", fileno(destfile), sizeof(t_tarheader));
-	DBG("Mode = %s", tar_h->mode);
-	if (write(fileno(destfile), tar_h, sizeof(t_tarheader)) == -1)
-		printf("Failed to write(%s)\n", strerror(errno));
-	if (!write_file(destfile, file))
+	// DBG("Writing header for file = %s", tar_h->name);
+	fwrite(tar_h, sizeof(t_tarheader), 1, destfile);
+	// DBG("Wrote header for file = %s", tar_h->name);
+	if (!write_file(destfile, file, tar_h))
 		return (0);
+	printf("a %s\n", new_name);
 	fclose(file);
 	if (tar_h->linkflag == '5')
 	{
-		DBG("Directory name = %s", filename);
 		if (prefix && *prefix)
 		{
 			if (!(save = calloc(sizeof(t_dstr), 1)) && ft_dstr_new(save, (*prefix)->cap))
 				return (0);
 			ft_dstr_append(save, (*prefix)->data);
 			add_directory(destfile, filename, prefix);
-			DBG("Prefix restored from %s -> %s", (*prefix)->data, save->data);
 			(*prefix) = save;
 		}
 		else
@@ -251,39 +214,8 @@ int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
 			*prefix = NULL;
 		}
 	}
-	// if (!copy_contents(destfile, file))
-	// {
-	// 	printf("Error; copy_contents()\n");
-	// 	return (0);
-	// }
-	// fwrite(tar_h, sizeof(t_tarheader), ,destfile)
 	return (1);
 }
-
-// int	handle_file(FILE *destfile, char *filename)
-// {
-// 	t_tarheader	*tar_h;
-// 	FILE		*file;
-
-// 	if (!(tar_h = calloc(sizeof(t_tarheader), 1)))
-// 	{
-// 		printf("Failed to calloc(sof(header), %s)\n", filename);
-// 		return (0);
-// 	}
-// 	if (!strcpy(tar_h->name, filename))
-// 	{
-// 		printf("Failed to copy name\n");
-// 		return (0);
-// 	}
-// 	if (!(file = fopen(filename, "r")))
-// 	{
-// 		printf("Failed to open %s\n", filename);
-// 		return (0);
-// 	}
-// 	else
-// 		printf("fd = %d\n", fileno(file));
-
-// }
 
 int	main(int argc, char *argv[])
 {
@@ -291,20 +223,11 @@ int	main(int argc, char *argv[])
 	void		*test;
 	FILE		*destfile;
 	int			i;
-	// t_dstr		*prefix;
 
-	// if (!prefix = calloc(sizeof(t_dstr), 1))
-	// {
-	// 	DBG("Failed %s", strerror(errno));
-	// 	return (0);
-	// }
-	// if (!ft_dstr_new(prefix, 20))
-	// 	return (0);
-	destfile = fopen(argv[1], "w"); //We can check if the file already exists later.
+	destfile = fopen(argv[1], "w");
 	i = 2;
 	while (i < argc)
 	{
-		// if (!handle_file(destfile, argv[i++]))
 		if (!add_file(destfile, argv[i++], (t_dstr **)&test))
 		{
 			printf("Error\n");
@@ -315,6 +238,6 @@ int	main(int argc, char *argv[])
 		free(test);
 	if (!(test = calloc(sizeof(char), 1024)))
 		return (0);
-	fwrite(test, 1, 1024, destfile);
+	fwrite(test, 1024, 1, destfile);
 	fclose(destfile);
 }
