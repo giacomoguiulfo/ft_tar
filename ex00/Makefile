@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+         #
+#    By: asyed <asyed@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/06/20 11:36:52 by gguiulfo          #+#    #+#              #
-#    Updated: 2018/01/27 20:13:37 by gguiulfo         ###   ########.fr        #
+#    Updated: 2018/01/27 23:03:59 by asyed            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,8 +33,7 @@ MAKEFLAGS	+= --no-print-directory
 endif
 
 SRC_BASE	:=	\
-main
-
+archive
 
 INC_DIR		:= includes/
 OBJ_DIR		:= obj/

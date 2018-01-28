@@ -6,12 +6,15 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:43:36 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/27 23:01:44 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/28 00:10:26 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_tar.h"
 #include <errno.h>
+#include <grp.h>
+#include <pwd.h>
+
 /*
 ** Need to do proper base conversions lol
 ** Do sym/hard link support.
@@ -20,18 +23,35 @@
 int	add_stats(int fd, t_tarheader **tar_h)
 {
 	struct stat buf;
+	void *tempstruct;
 
 	if (fstat(fd, &buf) == -1)
 	{
 		printf("Failed to fstat %s\n", strerror(errno));
 		return (0);
 	}
-	strcpy((*tar_h)->mode, ft_itoa(buf.st_mode & 0777));
-	DBG("Mode = %o", buf.st_mode & 07777);
-	strcpy((*tar_h)->uid, ft_itoa(buf.st_uid));
-	strcpy((*tar_h)->gid, ft_itoa(buf.st_gid));
-	strcpy((*tar_h)->size, ft_itoa(buf.st_size));
-	strcpy((*tar_h)->mtime, ft_itoa(buf.st_mtime));
+	sprintf((*tar_h)->mode, "%06o ", (buf.st_mode & 0777));
+	DBG("Mode = %s", (*tar_h)->mode);
+	sprintf((*tar_h)->uid, "%06o ", buf.st_uid);
+	DBG("UID = %s", (*tar_h)->uid);
+	sprintf((*tar_h)->gid, "%06o ", buf.st_gid);
+	DBG("GID = %s", (*tar_h)->gid);
+	snprintf((*tar_h)->size, 12, "%010llo", buf.st_size);
+	DBG("Size = %s", (*tar_h)->size);
+	// strcpy((*tar_h)->mtime, ft_itoa(buf.st_mtime));
+	snprintf((*tar_h)->mtime, 12, "%lo", buf.st_mtime);
+	DBG("mtime = %s", (*tar_h)->mtime);
+	strcpy((*tar_h)->indicator, "ustar");
+	DBG("");
+	memcpy((*tar_h)->version, "00", 2);
+	// sprintf((*tar_h)->version, "00");
+	DBG("");
+	tempstruct = getpwuid(buf.st_uid);
+	DBG("");
+	sprintf((*tar_h)->uname, "%s", ((struct passwd *)tempstruct)->pw_name);
+	DBG("");
+	tempstruct = getgrgid(buf.st_gid);
+	sprintf((*tar_h)->gname, "%s", ((struct group *)tempstruct)->gr_name);
 	//Calculate checksum? 
 	return (1);
 }
@@ -41,6 +61,11 @@ int	add_stats(int fd, t_tarheader **tar_h)
 // 	char buf;
 
 // }
+
+/*
+** Take advantage of the prefix field in the future if 
+** the name is larger than 100 chars.
+*/
 
 int	add_file(FILE *destfile, char *filename)
 {
