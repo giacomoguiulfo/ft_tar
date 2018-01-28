@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:49:19 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/27 19:18:15 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/28 00:24:02 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,13 @@ typedef struct	s_tarheader
 	char 		checksum[8];
 	char 		linkflag[1];
 	char 		linkname[100];
+	char 		indicator[6];
+	char 		version[2];
+	char		uname[32];
+	char		gname[32];
+	char		devicemajor[8];
+	char		deviceminor[8];
+	char		nameprefix[155];
 	char 		pad[255];
 } 				t_tarheader;
 
