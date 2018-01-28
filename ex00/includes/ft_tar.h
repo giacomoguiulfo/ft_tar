@@ -6,7 +6,7 @@
 /*   By: suedadam <suedadam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 05:05:32 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 13:38:47 by suedadam         ###   ########.fr       */
+/*   Updated: 2018/01/28 13:56:20 by suedadam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@
 # include "libft.h"
 
 // # define DEVICEMAJOR(x) (((x >> 8) & 0xfff) | (unsigned int) (x >> 32) & ~0xfff)
-
-int	add_file(FILE *destfile, char *filename, t_dstr **prefix);
+static void	ft_suffixnull(char *dest, const char *format, int64_t str, size_t len);
+int			add_file(FILE *destfile, char *filename, t_dstr **prefix);
 
 /*
 ** File Size: Pad with zeroes instead of spaces...1988 uses spaces.
