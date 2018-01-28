@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:49:19 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 00:24:02 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/28 03:39:00 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,10 @@
 # include <string.h>
 # include <stdlib.h>
 # include "libft.h"
+
+// # define DEVICEMAJOR(x) (((x >> 8) & 0xfff) | (unsigned int) (x >> 32) & ~0xfff)
+
+int	add_file(FILE *destfile, char *filename, t_dstr **prefix);
 
 /*
 ** File Size: Pad with zeroes instead of spaces...1988 uses spaces. 
@@ -38,7 +42,7 @@ typedef struct	s_tarheader
 	char 		size[12];
 	char 		mtime[12];
 	char 		checksum[8];
-	char 		linkflag[1];
+	char 		linkflag;
 	char 		linkname[100];
 	char 		indicator[6];
 	char 		version[2];
