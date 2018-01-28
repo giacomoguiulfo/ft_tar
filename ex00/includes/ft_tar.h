@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_tar.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
+/*   By: suedadam <suedadam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 05:05:32 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 05:05:46 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/28 13:38:47 by suedadam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ typedef struct	s_tarheader
 	char		devicemajor[8];
 	char		deviceminor[8];
 	char		nameprefix[155];
-	char 		pad[255];
+	char 		pad[12];
 } 				t_tarheader;
 
 #endif

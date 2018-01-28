@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   archive.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
+/*   By: suedadam <suedadam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:43:36 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 05:05:26 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/28 13:39:57 by suedadam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,13 +42,31 @@ int	linkflag(t_tarheader **tar_h, struct stat buf)
 	return (1);
 }
 
+static void	ft_suffixnull(char *dest, const char *format, int64_t str, size_t len)
+{
+	static char	large[20] = "";
+
+	snprintf(large, len + 1, format, str);
+	memcpy(dest, large, len);
+}
+
+static void	calc_chksum(t_tarheader **tar_h)
+{
+	size_t			chk_pre;
+	int				i;
+	unsigned char	*bytes;
+
+	i = 0;
+	bytes = (unsigned char *)(*tar_h);
+	memset((*tar_h)->checksum, ' ', 8);
+	while (i < sizeof(t_tarheader))
+		chk_pre += bytes[i++];
+	sprintf((*tar_h)->checksum, "%06zo", chk_pre);
+}
+
 /*
 ** Need to do proper base conversions lol
 ** Do sym/hard link support.
-** Need to fix the space after the size to appear and make a cleaner 
-** way of doing so
-**
-** Need chksum support.
 ** Add initial trailing '/' to the directory at first. 
 */
 
@@ -56,7 +74,6 @@ int	add_stats(int fd, t_tarheader **tar_h)
 {
 	struct stat	buf;
 	void 		*tempstruct;
-	char		*tmp;
 
 	if (fstat(fd, &buf) == -1)
 	{
@@ -69,34 +86,24 @@ int	add_stats(int fd, t_tarheader **tar_h)
 	DBG("UID = %s", (*tar_h)->uid);
 	sprintf((*tar_h)->gid, "%06o ", buf.st_gid);
 	DBG("GID = %s", (*tar_h)->gid);
-	if (!(tmp = calloc(sizeof(char), 14)))
-		return (0);
-	snprintf(tmp, 13, "%011llo ", buf.st_size);
-	DBG("TMP = \"%s\"", tmp);
-	memcpy((*tar_h)->size, tmp, 12);
-	free(tmp);
+	ft_suffixnull((*tar_h)->size, "%011llo ", buf.st_size, 12);
+	ft_suffixnull((*tar_h)->mtime, "%011lo ", buf.st_mtime, 12);
 	DBG("Size = \"%s\" vs %lld", (*tar_h)->size, buf.st_size);
-	// strcpy((*tar_h)->mtime, ft_itoa(buf.st_mtime));
-	snprintf((*tar_h)->mtime, 12, "%lo", buf.st_mtime);
 	DBG("mtime = %s", (*tar_h)->mtime);
 	strcpy((*tar_h)->indicator, "ustar");
 	DBG("");
 	memcpy((*tar_h)->version, "00", 2);
-	// sprintf((*tar_h)->version, "00");
 	DBG("");
 	linkflag(tar_h, buf);
 	DBG("LinkFlag = %c", (*tar_h)->linkflag);
 	sprintf((*tar_h)->devicemajor, "%06o ", major(buf.st_rdev));
 	sprintf((*tar_h)->deviceminor, "%06o ", minor(buf.st_rdev));
-	// snprintf((*tar_h)->deviceminor, "%06o ", minor(buf.st_dev));
 	tempstruct = getpwuid(buf.st_uid);
-	DBG("");
 	sprintf((*tar_h)->uname, "%s", ((struct passwd *)tempstruct)->pw_name);
-	DBG("");
 	tempstruct = getgrgid(buf.st_gid);
 	sprintf((*tar_h)->gname, "%s", ((struct group *)tempstruct)->gr_name);
-	//Calculate checksum? 
-
+	calc_chksum(tar_h);
+	DBG("CHKSUM = \"%s\"", (*tar_h)->checksum);
 	return (1);
 }
 
@@ -143,7 +150,6 @@ int	add_directory(FILE *destfile, char *filename, t_dstr **prefix)
 			if (!add_file(destfile, dir->d_name, prefix))
 				DBG("File = %s readdir(%s)", filename, strerror(errno));
 		}
-		// return (0);
 	}
 	return (1);
 }
