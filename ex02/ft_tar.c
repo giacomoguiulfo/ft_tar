@@ -6,7 +6,7 @@
 /*   By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 23:23:26 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/28 23:48:55 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/29 00:05:33 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,8 @@ static t_optsdata	g_taropts =
 int main(int argc, char const *argv[])
 {
 	t_optparser	data;
+	FILE		*destfp;
+	int			tar;
 
 	data.flags = 0;
 	if (ft_opts((char **)argv, &g_taropts, &data, 1))
@@ -52,5 +54,17 @@ int main(int argc, char const *argv[])
 		return (TAR_ERR("Can't specify both -c and -x\n"));
 	if (TAR_HAS_OPT_LT(data.flags) && TAR_HAS_OPT_LX(data.flags))
 		return (TAR_ERR("Can't specify both -t and -x\n"));
-	return (0);
+	tar = TAR_HAS_OPT_LC(data.flags);
+	if (TAR_HAS_OPT_LF(data.flags))
+	{
+		if (!(destfp = fopen(data.argv[0], (tar) ? "w" : "r")))
+			return (TAR_ERR("%s", strerror(errno)));
+	}
+	else
+	{
+		if (!(destfp = fopen((tar) ? 1 : 0, (tar) ? "w" : "r")))
+			return (TAR_ERR("%s", strerror(errno)));
+
+	}
+	return ((tar) ? ft_tar() : ft_untar());
 }
