@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 05:05:32 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 23:32:11 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 01:04:15 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,16 +70,17 @@ int				add_file(FILE *destfile, char *filename, t_dstr **prefix);
 ** unutils.c
 */
 
-int			validate_checksum(t_tarheader *tar_h, char *original);
-void		unarchive_special(const char *path, char data[], int size);
+int				validate_checksum(t_tarheader *tar_h, char *original);
+void			unarchive_special(const char *path, char data[], int size);
 
 /*
 ** ft_unarchive.c
 */
 
-int			ft_unarchive(char *data, size_t archive_size);
-int			file_handle(char *data, size_t offset, size_t file_size, char *buf);
-void		ftar_permissions(const char *path, char *data);
-void		unarchive_file(const char *path, char data[], int size);
+int				ft_unarchive(char *data, size_t archive_size);
+int				file_handle(char *data, size_t offset,
+							size_t file_size, char *buf);
+void			ftar_permissions(const char *path, char *data);
+void			unarchive_file(const char *path, char data[], int size);
 
 #endif
