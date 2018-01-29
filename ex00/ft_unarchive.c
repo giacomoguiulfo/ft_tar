@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_unarchive.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 23:06:30 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/28 23:21:40 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/28 23:32:17 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ char	**g_argv;
 #define FTAR_MODE(d, o)		((d) + (o) + 100)
 #define USER_IS_ROOT		(0 == getuid())
 
-static void unarchive_file(const char *path, char data[], int size)
+void	unarchive_file(const char *path, char data[], int size)
 {
 	FILE	*fp;
 
@@ -48,26 +48,7 @@ static void unarchive_file(const char *path, char data[], int size)
 	printf("%s, ", path);
 }
 
-void		unarchive_special(const char *path, char data[], int size)
-{
-	char	buf[16];
-	mode_t	mode;
-	dev_t	dev;
-	size_t	major;
-	size_t	minor;
-
-	strncpy(buf, data + 100, 9);
-	mode = strtol(buf, NULL, 8);
-	major = strtoul(data + 329, NULL, 8);
-	minor = strtoul(data + 337, NULL, 8);
-	dev = makedev(major, minor);
-	if (mknod(path, mode, dev))
-		perror(g_argv[0]);
-	else
-		unarchive_file(path, data, size);
-}
-
-static void	ftar_permissions(const char *path, char *data)
+void	ftar_permissions(const char *path, char *data)
 {
 	struct utimbuf	ubuf;
 	char			buf[156];
@@ -75,9 +56,9 @@ static void	ftar_permissions(const char *path, char *data)
 	gid_t			gid;
 	mode_t			mode;
 
-	strncpy(buf, data + 108,  9);
+	strncpy(buf, data + 108, 9);
 	uid = strtol(buf, NULL, 8);
-	strncpy(buf, data + 116,  9);
+	strncpy(buf, data + 116, 9);
 	gid = strtol(buf, NULL, 8);
 	strncpy(buf, data + 100, 9);
 	mode = strtol(buf, NULL, 8);
@@ -90,30 +71,29 @@ static void	ftar_permissions(const char *path, char *data)
 		perror(g_argv[0]);
 }
 
-int		validate_checksum(t_tarheader *tar_h, char *original)
+int	file_handle(char *data, size_t offset, size_t file_size, char *buf)
 {
-	size_t			chk_pre;
-	size_t			i;
-	unsigned char	*bytes;
-	char			buf[8];
-
-    chk_pre = 0;
-    i = 0;
-    bytes = (unsigned char *)(tar_h);
-    memset(tar_h->checksum, ' ', 8);
-    while (i < sizeof(t_tarheader))
-        chk_pre += bytes[i++];
-	snprintf(buf, 7, "%06zo", chk_pre);
-	return (strcmp(buf, original));
+	if (FTAR_NORMAL(data + offset))
+		unarchive_file(buf, data + offset + FTAR_HEADSIZE, file_size);
+	else if (FTAR_ISSPECIAL(data + offset))
+		unarchive_special(buf, data + offset + FTAR_HEADSIZE, file_size);
+	else if (FTAR_ISDIR(data + offset))
+	{
+		if (-1 == mkdir(buf, 0) && errno != EEXIST)
+			return (FTAR_ERR(FTAR_ERR_MSG2, strerror(errno)));
+		printf("%s, ", buf);
+	}
+	else if (buf[0])
+		return (FTAR_ERR(FTAR_ERR_MSG1));
+	return (1);
 }
 
-static int	ft_unarchive(char *data, size_t archive_size)
+int	ft_unarchive(char *data, size_t archive_size)
 {
 	t_tarheader tar_h;
-	t_list	*list;
-	char	buf[156];
-	size_t	offset;
-	size_t	file_size;
+	char		buf[156];
+	size_t		offset;
+	size_t		file_size;
 
 	offset = 0;
 	while (offset < archive_size)
@@ -123,22 +103,10 @@ static int	ft_unarchive(char *data, size_t archive_size)
 		if (buf[0] && validate_checksum(&tar_h, buf))
 			return (FTAR_ERR(FTAR_ERR_MSG2, "Invalid checksum"));
 		strncpy(buf, FTAR_FILESIZE(data, offset), 13);
-		file_size = strtoul(buf, (char **) NULL, 8);
+		file_size = strtoul(buf, (char **)NULL, 8);
 		strncpy(buf, data + offset, 101);
-		if (FTAR_NORMAL(data + offset))
-			unarchive_file(buf, data + offset + FTAR_HEADSIZE, file_size);
-		else if (FTAR_LINK(data + offset))
-			; // handle links
-		else if (FTAR_ISSPECIAL(data + offset))
-			unarchive_special(buf, data + offset + FTAR_HEADSIZE, file_size);
-		else if (FTAR_ISDIR(data + offset))
-		{
-			if (-1 == mkdir(buf, 0) && errno != EEXIST)
-				return (FTAR_ERR(FTAR_ERR_MSG2, strerror(errno)));
-			printf("%s, ", buf);
-		}
-		else if (buf[0])
-			return (FTAR_ERR(FTAR_ERR_MSG1));
+		if (!file_handle(data, offset, file_size, buf))
+			return (0);
 		if (buf[0] && (1 || USER_IS_ROOT))
 			ftar_permissions(buf, data + offset);
 		if (file_size > 0)
@@ -148,7 +116,7 @@ static int	ft_unarchive(char *data, size_t archive_size)
 	return (0);
 }
 
-int main(int argc, char const *argv[])
+int			main(int argc, char const *argv[])
 {
 	FILE	*fp;
 	size_t	archive_size;

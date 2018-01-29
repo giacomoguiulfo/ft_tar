@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 21:43:24 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 22:05:04 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/28 22:41:08 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,8 +99,8 @@ int		add_stats(int fd, t_tarheader **tar_h)
 	strcpy((*tar_h)->indicator, "ustar");
 	memcpy((*tar_h)->version, "00", 2);
 	linkflag(tar_h, buf);
-	sprintf((*tar_h)->devicemajor, "%06o ", major(buf.st_rdev));
-	sprintf((*tar_h)->deviceminor, "%06o ", minor(buf.st_rdev));
+	sprintf((*tar_h)->devicemajor, "%06o ", major(buf.st_dev));
+	sprintf((*tar_h)->deviceminor, "%06o ", minor(buf.st_dev));
 	tempstruct = getpwuid(buf.st_uid);
 	snprintf((*tar_h)->uname, 32, "%s", ((struct passwd *)tempstruct)->pw_name);
 	tempstruct = getgrgid(buf.st_gid);
