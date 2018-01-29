@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   ft_tar.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 23:23:26 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/29 00:05:33 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/29 00:18:08 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
 #include "ft_tar.h"
+#include <errno.h>
 
 #define TAR_OPT_LC			(1 << 0)
 #define TAR_OPT_LF			(1 << 1)
@@ -39,7 +39,7 @@ static t_optsdata	g_taropts =
 	}
 };
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
 	t_optparser	data;
 	FILE		*destfp;
@@ -62,9 +62,10 @@ int main(int argc, char const *argv[])
 	}
 	else
 	{
-		if (!(destfp = fopen((tar) ? 1 : 0, (tar) ? "w" : "r")))
+		if (!(destfp = fdopen((tar) ? 1 : 0, (tar) ? "w" : "r")))
 			return (TAR_ERR("%s", strerror(errno)));
 
 	}
-	return ((tar) ? ft_tar() : ft_untar());
+	return ((tar) ? ft_tar(argc, data.argv, destfp) :
+		ft_untar(argc, data.argv, destfp));
 }

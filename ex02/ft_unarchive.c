@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 23:06:30 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/29 00:03:14 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 00:26:30 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ void	unarchive_file(const char *path, char data[], int size)
 	}
 	fwrite(data, size, sizeof(char), fp);
 	fclose(fp);
-	printf("%s, ", path);
 }
 
 void	ftar_permissions(const char *path, char *data)
@@ -81,7 +80,6 @@ int	file_handle(char *data, size_t offset, size_t file_size, char *buf)
 	{
 		if (-1 == mkdir(buf, 0) && errno != EEXIST)
 			return (FTAR_ERR(FTAR_ERR_MSG2, strerror(errno)));
-		printf("%s, ", buf);
 	}
 	else if (buf[0])
 		return (FTAR_ERR(FTAR_ERR_MSG1));
@@ -116,16 +114,12 @@ int	ft_unarchive(char *data, size_t archive_size)
 	return (0);
 }
 
-int	ft_untar(int argc, char const *argv[], FILE *fp)
+int	ft_untar(int argc, char *argv[], FILE *fp)
 {
 	size_t	archive_size;
 	char	*data;
 
 	g_argv = (char **)argv;
-	if (argc != 2)
-		return (FTAR_ERR(FTAR_USAGE));
-	if (!fp)
-		return (FTAR_ERR(FTAR_ERR_MSG, argv[1], strerror(errno)));
 	fseek(fp, 0, SEEK_END);
 	archive_size = ftell(fp);
 	if (archive_size < FTAR_HEADSIZE)

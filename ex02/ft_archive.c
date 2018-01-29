@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:43:36 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/29 00:03:19 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 00:25:25 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,6 +125,7 @@ int	ft_tar(int argc, char *argv[], FILE *destfile)
 	int			i;
 
 	i = 0;
+	test = NULL;
 	while (argv[i])
 	{
 		if (!add_file(destfile, argv[i++], (t_dstr **)&test))
