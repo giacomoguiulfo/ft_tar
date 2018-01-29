@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:43:36 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 23:48:10 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 00:03:19 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,24 +119,19 @@ int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
 	return (linkf_handle(tar_h->linkflag, destfile, prefix, filename));
 }
 
-int	ft_archive(int argc, char *argv[], FILE *destfile)
+int	ft_tar(int argc, char *argv[], FILE *destfile)
 {
 	void		*test;
 	int			i;
 
-	i = 2;
-	if (argc >= 3 && destfile)
+	i = 0;
+	while (argv[i])
 	{
-		while (i < argc)
+		if (!add_file(destfile, argv[i++], (t_dstr **)&test))
 		{
-			if (!add_file(destfile, argv[i++], (t_dstr **)&test))
-			{
-				printf("%s: Error %s\n", argv[0], strerror(errno));
-				return (0);
-			}
+			printf("%s: Error %s\n", argv[0], strerror(errno));
+			return (0);
 		}
 	}
-	else
-		printf("%s: %s\n", argv[0], (errno) ? strerror(errno) : ERR_PARAMS);
 	return (end_padding(&test, destfile));
 }

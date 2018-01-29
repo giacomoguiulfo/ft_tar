@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 05:05:32 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 23:46:33 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 00:03:51 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ int				add_directory(FILE *destfile, char *filename,
 							t_dstr **prefix);
 int				write_file(FILE *destfile, FILE *src, t_tarheader *tar_h);
 int				add_file(FILE *destfile, char *filename, t_dstr **prefix);
+int				ft_tar(int argc, char *argv[], FILE *destfile);
 
 /*
 ** unutils.c
@@ -81,6 +82,6 @@ int			ft_unarchive(char *data, size_t archive_size);
 int			file_handle(char *data, size_t offset, size_t file_size, char *buf);
 void		ftar_permissions(const char *path, char *data);
 void		unarchive_file(const char *path, char data[], int size);
-int			ft_unarchive_m(int argc, char const *argv[], FILE *fp);
+int			ft_untar(int argc, char const *argv[], FILE *fp);
 
 #endif
