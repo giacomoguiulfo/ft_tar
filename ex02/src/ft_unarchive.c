@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_unarchive.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
+/*   By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 23:06:30 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/29 00:03:14 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 00:26:04 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <utime.h>
 #include <time.h>
 
-char	**g_argv;
+extern char	**g_argv;
 
 #define FTAR_ERR(s, ...)	((fprintf(stderr, s, ##__VA_ARGS__)) ? 1 : 1)
 #define FTAR_USAGE			"usage: %s archived_file", g_argv[0]
@@ -116,14 +116,11 @@ int	ft_unarchive(char *data, size_t archive_size)
 	return (0);
 }
 
-int	ft_untar(int argc, char const *argv[], FILE *fp)
+int	ft_untar(char **argv, FILE *fp)
 {
 	size_t	archive_size;
 	char	*data;
 
-	g_argv = (char **)argv;
-	if (argc != 2)
-		return (FTAR_ERR(FTAR_USAGE));
 	if (!fp)
 		return (FTAR_ERR(FTAR_ERR_MSG, argv[1], strerror(errno)));
 	fseek(fp, 0, SEEK_END);

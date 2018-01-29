@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:43:36 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/29 00:03:19 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 00:20:59 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
 	return (linkf_handle(tar_h->linkflag, destfile, prefix, filename));
 }
 
-int	ft_tar(int argc, char *argv[], FILE *destfile)
+int	ft_tar(char *argv[], FILE *destfile)
 {
 	void		*test;
 	int			i;
