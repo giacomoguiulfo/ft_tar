@@ -6,7 +6,7 @@
 /*   By: suedadam <suedadam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:43:36 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 16:21:35 by suedadam         ###   ########.fr       */
+/*   Updated: 2018/01/28 19:48:17 by suedadam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,7 @@ int	linkflag(t_tarheader **tar_h, struct stat buf)
 	else if (S_ISLNK(buf.st_mode))
 		(*tar_h)->linkflag = '2';
 	else
-	{
-
 		return (0);
-	}
 	return (1);
 }
 
@@ -60,7 +57,7 @@ static void	calc_chksum(t_tarheader **tar_h)
 	memset((*tar_h)->checksum, ' ', 8);
 	while (i < sizeof(t_tarheader))
 		chk_pre += bytes[i++];
-	sprintf((*tar_h)->checksum, "%06zo", chk_pre);
+	snprintf((*tar_h)->checksum, 7, "%06zo", chk_pre);
 }
 
 /*
@@ -90,9 +87,9 @@ int	add_stats(int fd, t_tarheader **tar_h)
 	sprintf((*tar_h)->devicemajor, "%06o ", major(buf.st_rdev));
 	sprintf((*tar_h)->deviceminor, "%06o ", minor(buf.st_rdev));
 	tempstruct = getpwuid(buf.st_uid);
-	sprintf((*tar_h)->uname, "%s", ((struct passwd *)tempstruct)->pw_name);
+	snprintf((*tar_h)->uname, 32, "%s", ((struct passwd *)tempstruct)->pw_name);
 	tempstruct = getgrgid(buf.st_gid);
-	sprintf((*tar_h)->gname, "%s", ((struct group *)tempstruct)->gr_name);
+	snprintf((*tar_h)->gname, 32, "%s", ((struct group *)tempstruct)->gr_name);
 	calc_chksum(tar_h);
 	return (1);
 }
@@ -147,7 +144,30 @@ int	write_file(FILE *destfile, FILE *src, t_tarheader *tar_h)
 	{
 		size = size % 512;
 		fwrite(pad, 512 - size, 1, destfile);
-		printf("Padded with %zu byts\n", 512 - size);
+	}
+	return (1);
+}
+
+static int	linkf_handle(char linkflag, FILE *destfile, t_dstr **prefix, char *filename)
+{
+	t_dstr	*save;
+
+	save = NULL;
+	if (linkflag == '5')
+	{
+		if (prefix && *prefix)
+		{
+			if (!(save = calloc(sizeof(t_dstr), 1)) && ft_dstr_new(save, (*prefix)->cap))
+				return (0);
+			ft_dstr_append(save, (*prefix)->data);
+			add_directory(destfile, filename, prefix);
+			(*prefix) = save;
+		}
+		else
+		{
+			add_directory(destfile, filename, prefix);
+			*prefix = NULL;
+		}
 	}
 	return (1);
 }
@@ -163,13 +183,9 @@ int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
 	char		buf[1024];
 	FILE		*file;
 	char		*new_name;
-	t_dstr		*save;
 
 	if (!(tar_h = calloc(sizeof(t_tarheader), 1)))
-	{
-		printf("Failed to calloc(sof(header), %s)\n", filename);
 		return (0);
-	}
 	if (prefix && *prefix)
 	{
 		new_name = calloc(sizeof(char), (*prefix)->len + ft_strlen(filename) + 1);
@@ -178,41 +194,25 @@ int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
 	}
 	else
 		new_name = filename;
-	if (!strcpy(tar_h->name, new_name))
-	{
-
-		return (0);
-	}
-	if (!(file = fopen(new_name, "r")))
-	{
-
-		return (0);
-	}
-	if (!add_stats(fileno(file), &tar_h))
+	if (!strcpy(tar_h->name, new_name) || !(file = fopen(new_name, "r"))
+		|| !add_stats(fileno(file), &tar_h))
 		return (0);
 	fwrite(tar_h, sizeof(t_tarheader), 1, destfile);
 	if (!write_file(destfile, file, tar_h))
 		return (0);
-	printf("a %s\n", new_name);
 	fclose(file);
-	if (tar_h->linkflag == '5')
-	{
-		if (prefix && *prefix)
-		{
-			if (!(save = calloc(sizeof(t_dstr), 1)) && ft_dstr_new(save, (*prefix)->cap))
-				return (0);
-			ft_dstr_append(save, (*prefix)->data);
-			add_directory(destfile, filename, prefix);
-			(*prefix) = save;
-	
-		}
-		else
-		{
-			add_directory(destfile, filename, prefix);
-			*prefix = NULL;
-		}
-	}
-	return (1);
+	return (linkf_handle(tar_h->linkflag, destfile, prefix, filename));
+}
+
+static void	end_padding(void **test, FILE *destfile)
+{
+	if (*test)
+		free(*test);
+	if (!(*test = calloc(sizeof(char), 1024)))
+		return ;
+	fwrite(*test, 1024, 1, destfile);
+	fclose(destfile);
+	printf("-> done\n");
 }
 
 int	main(int argc, char *argv[])
@@ -224,18 +224,24 @@ int	main(int argc, char *argv[])
 
 	destfile = fopen(argv[1], "w");
 	i = 2;
+	if (argc < 3)
+	{
+		printf("%s: Not enough paramaters\n", argv[0]);
+		return (0);
+	}
+	printf("-> Create archive from ");
 	while (i < argc)
 	{
+		if (i == (argc - 1))
+			printf("and %s in %s\n", argv[i], argv[1]);
+		else
+			printf("%s, ", argv[i]);
 		if (!add_file(destfile, argv[i++], (t_dstr **)&test))
 		{
-			printf("Error\n");
+			printf("%s: Error %s\n", argv[0], strerror(errno));
 			return (0);
 		}
 	}
-	if (test)
-		free(test);
-	if (!(test = calloc(sizeof(char), 1024)))
-		return (0);
-	fwrite(test, 1024, 1, destfile);
-	fclose(destfile);
+	end_padding(&test, destfile);
+	return (1);
 }
