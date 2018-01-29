@@ -52,5 +52,7 @@ Mkfile.old
 dkms.conf
 
 # Temporary files
-
 ._*
+
+# Project builds
+ft_tar
