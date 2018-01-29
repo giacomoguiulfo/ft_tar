@@ -6,7 +6,7 @@
 /*   By: suedadam <suedadam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:43:36 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 15:54:00 by suedadam         ###   ########.fr       */
+/*   Updated: 2018/01/28 16:21:35 by suedadam         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int	linkflag(t_tarheader **tar_h, struct stat buf)
 		(*tar_h)->linkflag = '2';
 	else
 	{
-		// DBG("Failed linkflag()");
+
 		return (0);
 	}
 	return (1);
@@ -133,7 +133,7 @@ int	write_file(FILE *destfile, FILE *src, t_tarheader *tar_h)
 
 	strncpy(size_buf, tar_h->size, 11);
 	size = strtoul(size_buf, NULL, 8);
-	DBG("Size_buf = %s an size = %zd", size_buf, size);
+	
 	if (size > 0)
 	{
 		if (!(buf = calloc(sizeof(char), size)))
@@ -143,7 +143,6 @@ int	write_file(FILE *destfile, FILE *src, t_tarheader *tar_h)
 		fclose(src);
 		free(buf);
 	}
-	// printf("Size = %zu", size);
 	if ((size > 512 && size % 512) || !size)
 	{
 		size = size % 512;
@@ -181,19 +180,17 @@ int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
 		new_name = filename;
 	if (!strcpy(tar_h->name, new_name))
 	{
-		// DBG("Failed to copy name");
+
 		return (0);
 	}
 	if (!(file = fopen(new_name, "r")))
 	{
-		// DBG("Failed to open %s", new_name);
+
 		return (0);
 	}
 	if (!add_stats(fileno(file), &tar_h))
 		return (0);
-	// DBG("Writing header for file = %s", tar_h->name);
 	fwrite(tar_h, sizeof(t_tarheader), 1, destfile);
-	// DBG("Wrote header for file = %s", tar_h->name);
 	if (!write_file(destfile, file, tar_h))
 		return (0);
 	printf("a %s\n", new_name);
@@ -207,6 +204,7 @@ int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
 			ft_dstr_append(save, (*prefix)->data);
 			add_directory(destfile, filename, prefix);
 			(*prefix) = save;
+	
 		}
 		else
 		{
