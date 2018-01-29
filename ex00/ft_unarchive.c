@@ -6,7 +6,7 @@
 /*   By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 23:06:30 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/28 23:04:41 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/28 23:21:40 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ char	**g_argv;
 #define FTAR_ISDIR(x)		(*((x) + 156) == '5')
 #define FTAR_FILESIZE(d, o)	((d) + (o) + 124)
 #define FTAR_MODE(d, o)		((d) + (o) + 100)
-#define USER_IS_ROOT(x)		(0 == getuid())
+#define USER_IS_ROOT		(0 == getuid())
 
 static void unarchive_file(const char *path, char data[], int size)
 {
@@ -45,6 +45,7 @@ static void unarchive_file(const char *path, char data[], int size)
 	}
 	fwrite(data, size, sizeof(char), fp);
 	fclose(fp);
+	printf("%s, ", path);
 }
 
 void		unarchive_special(const char *path, char data[], int size)
@@ -91,10 +92,10 @@ static void	ftar_permissions(const char *path, char *data)
 
 int		validate_checksum(t_tarheader *tar_h, char *original)
 {
-    size_t                    	chk_pre;
-    size_t                    	i;
-    unsigned char            	*bytes;
-	char						buf[8];
+	size_t			chk_pre;
+	size_t			i;
+	unsigned char	*bytes;
+	char			buf[8];
 
     chk_pre = 0;
     i = 0;
@@ -109,6 +110,7 @@ int		validate_checksum(t_tarheader *tar_h, char *original)
 static int	ft_unarchive(char *data, size_t archive_size)
 {
 	t_tarheader tar_h;
+	t_list	*list;
 	char	buf[156];
 	size_t	offset;
 	size_t	file_size;
@@ -118,7 +120,7 @@ static int	ft_unarchive(char *data, size_t archive_size)
 	{
 		strncpy(buf, data + offset + 148, 8);
 		memcpy(&tar_h, data + offset, FTAR_HEADSIZE);
-		if (validate_checksum(&tar_h, buf))
+		if (buf[0] && validate_checksum(&tar_h, buf))
 			return (FTAR_ERR(FTAR_ERR_MSG2, "Invalid checksum"));
 		strncpy(buf, FTAR_FILESIZE(data, offset), 13);
 		file_size = strtoul(buf, (char **) NULL, 8);
@@ -132,16 +134,18 @@ static int	ft_unarchive(char *data, size_t archive_size)
 		else if (FTAR_ISDIR(data + offset))
 		{
 			if (-1 == mkdir(buf, 0) && errno != EEXIST)
-				return (FTAR_ERR(FTAR_ERR_MSG2, strerror(errno)))
+				return (FTAR_ERR(FTAR_ERR_MSG2, strerror(errno)));
+			printf("%s, ", buf);
 		}
 		else if (buf[0])
 			return (FTAR_ERR(FTAR_ERR_MSG1));
-		if (1 || USER_IS_ROOT)
+		if (buf[0] && (1 || USER_IS_ROOT))
 			ftar_permissions(buf, data + offset);
 		if (file_size > 0)
 			offset += FTAR_HEADALIGN(file_size);
 		offset += FTAR_HEADSIZE;
 	}
+	return (0);
 }
 
 int main(int argc, char const *argv[])
@@ -162,7 +166,9 @@ int main(int argc, char const *argv[])
 	rewind(fp);
 	data = (char *)malloc(sizeof(char) * archive_size);
 	fread(data, archive_size, sizeof(char), fp);
+	printf("-> Get ");
 	ft_unarchive(data, archive_size);
 	fclose(fp);
+	printf("from %s\n-> done\n", argv[1]);
 	return (0);
 }
