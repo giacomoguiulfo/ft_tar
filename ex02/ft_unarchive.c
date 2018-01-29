@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 23:06:30 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/28 23:32:17 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 00:03:14 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,16 +116,15 @@ int	ft_unarchive(char *data, size_t archive_size)
 	return (0);
 }
 
-int			main(int argc, char const *argv[])
+int	ft_untar(int argc, char const *argv[], FILE *fp)
 {
-	FILE	*fp;
 	size_t	archive_size;
 	char	*data;
 
 	g_argv = (char **)argv;
 	if (argc != 2)
 		return (FTAR_ERR(FTAR_USAGE));
-	if (!(fp = fopen(argv[1], "r")))
+	if (!fp)
 		return (FTAR_ERR(FTAR_ERR_MSG, argv[1], strerror(errno)));
 	fseek(fp, 0, SEEK_END);
 	archive_size = ftell(fp);
@@ -134,9 +133,7 @@ int			main(int argc, char const *argv[])
 	rewind(fp);
 	data = (char *)malloc(sizeof(char) * archive_size);
 	fread(data, archive_size, sizeof(char), fp);
-	printf("-> Get ");
 	ft_unarchive(data, archive_size);
 	fclose(fp);
-	printf("from %s\n-> done\n", argv[1]);
 	return (0);
 }

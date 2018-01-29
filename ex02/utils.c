@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 21:43:24 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 22:41:08 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/28 23:49:06 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ int		end_padding(void **test, FILE *destfile)
 			return (0);
 		fwrite(*test, 1024, 1, destfile);
 		fclose(destfile);
-		printf("-> done\n");
 		return (1);
 	}
 	return (0);
