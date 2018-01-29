@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:43:36 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 22:05:39 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/28 22:09:13 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,6 @@ int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
 	fwrite(tar_h, sizeof(t_tarheader), 1, destfile);
 	if (tar_h->linkflag != '5' && !write_file(destfile, file, tar_h))
 		return (0);
-	DBG("Added file %s", new_name);
 	fclose(file);
 	return (linkf_handle(tar_h->linkflag, destfile, prefix, filename));
 }
