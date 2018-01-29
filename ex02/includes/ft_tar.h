@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 05:05:32 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/29 01:02:29 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 01:42:06 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,9 @@
 # include "libft.h"
 
 # define ERR_PARAMS "Not enough paramaters"
-# define TAR_ERR(s, ...)		((fprintf(stderr, s, ##__VA_ARGS__)) ? 1 : 1)
+# define TAR_MSG(s, ...)		"%s: " s "\n", g_argv[0], ##__VA_ARGS__
+# define TAR_PRN(s, ...)		fprintf(stderr, TAR_MSG(s, ##__VA_ARGS__))
+# define TAR_ERR(s, ...)		(TAR_PRN(s, ##__VA_ARGS__) ? 1 : 1)
 
 typedef struct	s_tarheader
 {
