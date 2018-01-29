@@ -6,7 +6,7 @@
 /*   By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 23:06:30 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/28 22:56:25 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/28 23:02:19 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ char	**g_argv;
 #define FTAR_ISDIR(x)		(*((x) + 156) == '5')
 #define FTAR_FILESIZE(d, o)	((d) + (o) + 124)
 #define FTAR_MODE(d, o)		((d) + (o) + 100)
+#define USER_IS_ROOT(x)		(0 == getuid())
 
 static void unarchive_file(const char *path, char data[], int size)
 {
@@ -45,8 +46,6 @@ static void unarchive_file(const char *path, char data[], int size)
 	fwrite(data, size, sizeof(char), fp);
 	fclose(fp);
 }
-
-
 
 void		unarchive_special(const char *path, char data[], int size)
 {
@@ -107,7 +106,7 @@ int		validate_checksum(t_tarheader *tar_h, char *original)
 	return (strcmp(buf, original));
 }
 
-static void	ft_unarchive(char *data, size_t archive_size)
+static int	ft_unarchive(char *data, size_t archive_size)
 {
 	t_tarheader tar_h;
 	char	buf[156];
@@ -133,24 +132,17 @@ static void	ft_unarchive(char *data, size_t archive_size)
 		else if (FTAR_ISDIR(data + offset))
 		{
 			if (-1 == mkdir(buf, 0) && errno != EEXIST)
-				perror(g_argv[0]);
+				return (FTAR_ERR(FTAR_ERR_MSG2, strerror(errno)))
 		}
-		else if (buf[0]) // fdsafdsa
-			FTAR_ERR(FTAR_ERR_MSG1);
-		// else if (0 == getuid())
-		// else if ()... handle links
-		// else invalid file type
-		// if (1 || 0 == getuid()) // FTAR_HAS_OPT_LP
-		// {
-		// 	ftar_permissions(buf, data + offset);
-		// 	// ftar_time();
-		// }
+		else if (buf[0])
+			return (FTAR_ERR(FTAR_ERR_MSG1));
+		if (1 || USER_IS_ROOT)
+			ftar_permissions(buf, data + offset);
 		if (file_size > 0)
 			offset += FTAR_HEADALIGN(file_size);
 		offset += FTAR_HEADSIZE;
 	}
 }
-
 
 int main(int argc, char const *argv[])
 {
