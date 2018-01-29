@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 05:05:32 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/29 01:42:06 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/29 02:25:12 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,20 @@
 # define TAR_MSG(s, ...)		"%s: " s "\n", g_argv[0], ##__VA_ARGS__
 # define TAR_PRN(s, ...)		fprintf(stderr, TAR_MSG(s, ##__VA_ARGS__))
 # define TAR_ERR(s, ...)		(TAR_PRN(s, ##__VA_ARGS__) ? 1 : 1)
+# define TAR_OPT_LC			(1 << 0)
+# define TAR_OPT_LF			(1 << 1)
+# define TAR_OPT_LP			(1 << 2)
+# define TAR_OPT_LT			(1 << 3)
+# define TAR_OPT_LV			(1 << 4)
+# define TAR_OPT_LX			(1 << 5)
+# define TAR_OPT_LZ			(1 << 6)
+# define TAR_HAS_OPT_LC(x)	((x) & TAR_OPT_LC)
+# define TAR_HAS_OPT_LF(x)	((x) & TAR_OPT_LF)
+# define TAR_HAS_OPT_LP(x)	((x) & TAR_OPT_LP)
+# define TAR_HAS_OPT_LT(x)	((x) & TAR_OPT_LT)
+# define TAR_HAS_OPT_LV(x)	((x) & TAR_OPT_LV)
+# define TAR_HAS_OPT_LX(x)	((x) & TAR_OPT_LX)
+# define TAR_HAS_OPT_LZ(x)	((x) & TAR_OPT_LZ)
 
 typedef struct	s_tarheader
 {
@@ -46,6 +60,13 @@ typedef struct	s_tarheader
 	char		nameprefix[155];
 	char		pad[12];
 }				t_tarheader;
+
+typedef struct	s_tar
+{
+	t_flag		flags;
+	char		**argv;
+	char		*file;
+}				t_tar;
 
 /*
 ** utils.c
@@ -88,6 +109,32 @@ void			ftar_permissions(const char *path, char *data);
 void			unarchive_file(const char *path, char data[], int size);
 int				ft_untar(FILE *fp);
 
-extern char **g_argv;
+/*
+** ft_tar.c
+*/
 
+int				get_file(char *def, char *arg, t_tar *data);
+
+static t_optsdata	g_taropts =
+{
+	"ft_tar", "ft_tar - manipulate tape archives\n", "", NULL, 1, 1, 0, {
+		{'c', NULL, "Create a new archive containing the specified items.",
+			NULL, NULL, TAR_OPT_LC, 0, NULL, 0, 0},
+		{'f', NULL, "Read/write the archive from/to the specified file.",
+			NULL, "file", TAR_OPT_LF, 0, &get_file, 1, 0},
+		{'p', NULL, "(x mode only) Preserve file permissions.",
+			NULL, NULL, TAR_OPT_LP, 0, NULL, 0, 0},
+		{'t', NULL, "List archive contents to stdout.",
+			NULL, NULL, TAR_OPT_LT, 0, NULL, 0, 0},
+		{'v', NULL, "Produce verbose output.",
+			NULL, NULL, TAR_OPT_LV, 0, NULL, 0, 0},
+		{'x', NULL, "Extract to disk from the archive.",
+			NULL, NULL, TAR_OPT_LX, 0, NULL, 0, 0},
+		{'z', NULL, "Use GZIP(1) compression.",
+			NULL, NULL, TAR_OPT_LZ, 0, NULL, 0, 0},
+		{0, NULL, NULL, NULL, NULL, 0, 0, NULL, 0, 0}
+	}
+};
+
+extern char **g_argv;
 #endif

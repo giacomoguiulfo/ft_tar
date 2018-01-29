@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_tar.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 23:23:26 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/29 01:51:20 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/29 02:23:42 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,27 +15,7 @@
 
 char	**g_argv;
 
-#define TAR_OPT_LC			(1 << 0)
-#define TAR_OPT_LF			(1 << 1)
-#define TAR_OPT_LP			(1 << 2)
-#define TAR_OPT_LT			(1 << 3)
-#define TAR_OPT_LV			(1 << 4)
-#define TAR_OPT_LX			(1 << 5)
-#define TAR_HAS_OPT_LC(x)	((x) & TAR_OPT_LC)
-#define TAR_HAS_OPT_LF(x)	((x) & TAR_OPT_LF)
-#define TAR_HAS_OPT_LP(x)	((x) & TAR_OPT_LP)
-#define TAR_HAS_OPT_LT(x)	((x) & TAR_OPT_LT)
-#define TAR_HAS_OPT_LV(x)	((x) & TAR_OPT_LV)
-#define TAR_HAS_OPT_LX(x)	((x) & TAR_OPT_LX)
-
-typedef struct	s_tar
-{
-	t_flag		flags;
-	char		**argv;
-	char		*file;
-}				t_tar;
-
-int	get_file(char *def, char *arg, t_tar *data)
+int		get_file(char *def, char *arg, t_tar *data)
 {
 	if (!data)
 		return (1);
@@ -45,51 +25,64 @@ int	get_file(char *def, char *arg, t_tar *data)
 	return (0);
 }
 
-static t_optsdata	g_taropts =
+int		gzip_parse(char **cmd, t_tar data)
 {
-	"ft_tar", "ft_tar - manipulate tape archives\n", "", NULL, 1, 1, 0, {
-		{'c',	NULL, "Create a new archive containing the specified items.",
-				NULL, NULL, TAR_OPT_LC, 0, NULL, 0, 0},
-		{'f',	NULL, "Read/write the archive from/to the specified file.",
-				NULL, "file", TAR_OPT_LF, 0, &get_file, 1, 0},
-		{'p',	NULL, "(x mode only) Preserve file permissions.",
-				NULL, NULL, TAR_OPT_LP, 0, NULL, 0, 0},
-		{'t',	NULL, "List archive contents to stdout.",
-				NULL, NULL, TAR_OPT_LT, 0, NULL, 0, 0},
-		{'v',	NULL, "Produce verbose output.",
-				NULL, NULL, TAR_OPT_LV, 0, NULL, 0, 0},
-		{'x',	NULL, "Extract to disk from the archive.",
-				NULL, NULL, TAR_OPT_LX, 0, NULL, 0, 0},
-		{0, 	NULL, NULL, NULL, NULL, 0, 0, NULL, 0, 0}
+	if (!(*cmd = calloc(sizeof(char), strlen(data.file) + 10)))
+		return (1);
+	strcpy(*cmd, "gzip ");
+	if (TAR_HAS_OPT_LX(data.flags))
+	{
+		strcat(*cmd, "-d ");
+		strcat(*cmd, data.file);
+		data.file[strlen(data.file) - 3] = '\0';
+		return (system(*cmd));
 	}
-};
+	else
+		strcat(*cmd, data.file);
+	return (0);
+}
+
+int		flags_parse(t_tar *data, FILE **fp, int *tar, char **cmd)
+{
+	if (TAR_HAS_OPT_LC(data->flags) && TAR_HAS_OPT_LT(data->flags))
+		return (TAR_ERR("Can't specify both -c and -t"));
+	if (TAR_HAS_OPT_LC(data->flags) && TAR_HAS_OPT_LX(data->flags))
+		return (TAR_ERR("Can't specify both -c and -x"));
+	if (TAR_HAS_OPT_LT(data->flags) && TAR_HAS_OPT_LX(data->flags))
+		return (TAR_ERR("Can't specify both -t and -x"));
+	*tar = TAR_HAS_OPT_LC(data->flags);
+	if (TAR_HAS_OPT_LZ(data->flags) && gzip_parse(cmd, *data))
+		return (1);
+	if (TAR_HAS_OPT_LF(data->flags))
+	{
+		if (!TAR_HAS_OPT_LC(data->flags) && !TAR_HAS_OPT_LT(data->flags) &&
+			!TAR_HAS_OPT_LX(data->flags))
+			return (TAR_ERR("Must specify one of -c, -t, -x"));
+		if (!(*fp = fopen(data->file, (*tar) ? "w" : "r")))
+			return (TAR_ERR("%s: %s", data->file, strerror(errno)));
+	}
+	else if (!(*fp = fdopen((*tar) ? 1 : 0, (*tar) ? "w" : "r")))
+		return (TAR_ERR("%s", strerror(errno)));
+	return (0);
+}
 
 int		main(int argc __attribute__((unused)), char const *argv[])
 {
 	t_tar	data;
 	FILE	*fp;
+	char	*cmd;
 	int		tar;
 
 	g_argv = (char **)argv;
 	data.flags = 0;
 	if (ft_opts((char **)argv, &g_taropts, &data, 1))
 		return (1);
-	if (TAR_HAS_OPT_LC(data.flags) && TAR_HAS_OPT_LT(data.flags))
-		return (TAR_ERR("Can't specify both -c and -t"));
-	if (TAR_HAS_OPT_LC(data.flags) && TAR_HAS_OPT_LX(data.flags))
-		return (TAR_ERR("Can't specify both -c and -x"));
-	if (TAR_HAS_OPT_LT(data.flags) && TAR_HAS_OPT_LX(data.flags))
-		return (TAR_ERR("Can't specify both -t and -x"));
-	tar = TAR_HAS_OPT_LC(data.flags);
-	if (TAR_HAS_OPT_LF(data.flags))
+	if (flags_parse(&data, &fp, &tar, &cmd))
+		return (1);
+	if (TAR_HAS_OPT_LZ(data.flags) && TAR_HAS_OPT_LC(data.flags))
 	{
-		if (!TAR_HAS_OPT_LC(data.flags) && !TAR_HAS_OPT_LT(data.flags) &&
-			!TAR_HAS_OPT_LX(data.flags))
-			return (TAR_ERR("Must specify one of -c, -t, -x"));
-		if (!(fp = fopen(data.file, (tar) ? "w" : "r")))
-			return (TAR_ERR("%s: %s", data.file, strerror(errno)));
+		if (!ft_tar(data.argv, fp))
+			return (system(cmd));
 	}
-	else if (!(fp = fdopen((tar) ? 1 : 0, (tar) ? "w" : "r")))
-		return (TAR_ERR("%s", strerror(errno)));
 	return ((tar) ? ft_tar(data.argv, fp) : ft_untar(fp));
 }
