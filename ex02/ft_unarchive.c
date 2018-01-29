@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 23:06:30 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/29 00:26:30 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 00:31:43 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,6 @@
 #include <sys/types.h>
 #include <utime.h>
 #include <time.h>
-
-char	**g_argv;
 
 #define FTAR_ERR(s, ...)	((fprintf(stderr, s, ##__VA_ARGS__)) ? 1 : 1)
 #define FTAR_USAGE			"usage: %s archived_file", g_argv[0]
@@ -119,7 +117,6 @@ int	ft_untar(int argc, char *argv[], FILE *fp)
 	size_t	archive_size;
 	char	*data;
 
-	g_argv = (char **)argv;
 	fseek(fp, 0, SEEK_END);
 	archive_size = ftell(fp);
 	if (archive_size < FTAR_HEADSIZE)

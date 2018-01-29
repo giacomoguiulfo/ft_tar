@@ -6,12 +6,14 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 23:23:26 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/29 00:18:08 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 00:30:38 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_tar.h"
 #include <errno.h>
+
+char	**g_argv;
 
 #define TAR_OPT_LC			(1 << 0)
 #define TAR_OPT_LF			(1 << 1)
@@ -66,6 +68,7 @@ int main(int argc, char *argv[])
 			return (TAR_ERR("%s", strerror(errno)));
 
 	}
+	g_argv = argv;
 	return ((tar) ? ft_tar(argc, data.argv, destfp) :
 		ft_untar(argc, data.argv, destfp));
 }
