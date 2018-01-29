@@ -6,7 +6,7 @@
 /*   By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 23:06:30 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/28 23:02:19 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/28 23:04:41 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ static int	ft_unarchive(char *data, size_t archive_size)
 		strncpy(buf, data + offset + 148, 8);
 		memcpy(&tar_h, data + offset, FTAR_HEADSIZE);
 		if (validate_checksum(&tar_h, buf))
-			return ;
+			return (FTAR_ERR(FTAR_ERR_MSG2, "Invalid checksum"));
 		strncpy(buf, FTAR_FILESIZE(data, offset), 13);
 		file_size = strtoul(buf, (char **) NULL, 8);
 		strncpy(buf, data + offset, 101);
