@@ -6,15 +6,14 @@
 /*   By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 23:23:26 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/29 00:35:53 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/29 00:51:57 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
 #include "ft_tar.h"
 #include <errno.h>
 
-char **argv;
+char	**g_argv;
 
 #define TAR_OPT_LC			(1 << 0)
 #define TAR_OPT_LF			(1 << 1)
@@ -61,7 +60,7 @@ int main(int argc __attribute__((unused)), char const *argv[])
 	tar = TAR_HAS_OPT_LC(data.flags);
 	if (TAR_HAS_OPT_LF(data.flags))
 	{
-		if (!(fp = fopen(data.argv[0], (tar) ? "w" : "r")))
+		if (!(fp = fopen((data.argv++)[0], (tar) ? "w" : "r")))
 			return (TAR_ERR("%s", strerror(errno)));
 	}
 	else
@@ -70,5 +69,5 @@ int main(int argc __attribute__((unused)), char const *argv[])
 			return (TAR_ERR("%s", strerror(errno)));
 
 	}
-	return ((tar) ? ft_tar(data.argv, fp) : ft_untar(data.argv, fp));
+	return ((tar) ? ft_tar(data.argv, fp) : ft_untar(fp));
 }

@@ -6,7 +6,7 @@
 /*   By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 23:06:30 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/29 00:26:04 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/29 00:52:17 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,6 @@
 #include <sys/types.h>
 #include <utime.h>
 #include <time.h>
-
-extern char	**g_argv;
 
 #define FTAR_ERR(s, ...)	((fprintf(stderr, s, ##__VA_ARGS__)) ? 1 : 1)
 #define FTAR_USAGE			"usage: %s archived_file", g_argv[0]
@@ -45,7 +43,6 @@ void	unarchive_file(const char *path, char data[], int size)
 	}
 	fwrite(data, size, sizeof(char), fp);
 	fclose(fp);
-	printf("%s, ", path);
 }
 
 void	ftar_permissions(const char *path, char *data)
@@ -81,11 +78,10 @@ int	file_handle(char *data, size_t offset, size_t file_size, char *buf)
 	{
 		if (-1 == mkdir(buf, 0) && errno != EEXIST)
 			return (FTAR_ERR(FTAR_ERR_MSG2, strerror(errno)));
-		printf("%s, ", buf);
 	}
 	else if (buf[0])
 		return (FTAR_ERR(FTAR_ERR_MSG1));
-	return (1);
+	return (0);
 }
 
 int	ft_unarchive(char *data, size_t archive_size)
@@ -105,8 +101,8 @@ int	ft_unarchive(char *data, size_t archive_size)
 		strncpy(buf, FTAR_FILESIZE(data, offset), 13);
 		file_size = strtoul(buf, (char **)NULL, 8);
 		strncpy(buf, data + offset, 101);
-		if (!file_handle(data, offset, file_size, buf))
-			return (0);
+		if (file_handle(data, offset, file_size, buf))
+			return (1);
 		if (buf[0] && (1 || USER_IS_ROOT))
 			ftar_permissions(buf, data + offset);
 		if (file_size > 0)
@@ -116,13 +112,11 @@ int	ft_unarchive(char *data, size_t archive_size)
 	return (0);
 }
 
-int	ft_untar(char **argv, FILE *fp)
+int	ft_untar(FILE *fp)
 {
 	size_t	archive_size;
 	char	*data;
 
-	if (!fp)
-		return (FTAR_ERR(FTAR_ERR_MSG, argv[1], strerror(errno)));
 	fseek(fp, 0, SEEK_END);
 	archive_size = ftell(fp);
 	if (archive_size < FTAR_HEADSIZE)

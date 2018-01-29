@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 21:43:24 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/28 23:49:06 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 00:49:30 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,12 @@ int		end_padding(void **test, FILE *destfile)
 		if (*test)
 			free(*test);
 		if (!(*test = calloc(sizeof(char), 1024)))
-			return (0);
+			return (1);
 		fwrite(*test, 1024, 1, destfile);
 		fclose(destfile);
-		return (1);
+		return (0);
 	}
-	return (0);
+	return (1);
 }
 
 int		linkf_handle(char linkflag, FILE *destfile,

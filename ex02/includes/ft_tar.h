@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 05:05:32 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/29 00:26:34 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/29 00:40:05 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,8 @@ int			ft_unarchive(char *data, size_t archive_size);
 int			file_handle(char *data, size_t offset, size_t file_size, char *buf);
 void		ftar_permissions(const char *path, char *data);
 void		unarchive_file(const char *path, char data[], int size);
-int			ft_untar(char **argv, FILE *fp);
+int			ft_untar(FILE *fp);
+
+extern char **g_argv;
 
 #endif

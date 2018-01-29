@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:43:36 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/29 00:20:59 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/29 00:37:45 by gguiulfo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,11 +125,12 @@ int	ft_tar(char *argv[], FILE *destfile)
 	int			i;
 
 	i = 0;
+	test = NULL;
 	while (argv[i])
 	{
 		if (!add_file(destfile, argv[i++], (t_dstr **)&test))
 		{
-			printf("%s: Error %s\n", argv[0], strerror(errno));
+			printf("%s: Error %s\n", g_argv[0], strerror(errno));
 			return (0);
 		}
 	}
