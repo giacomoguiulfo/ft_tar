@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_tar.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 23:23:26 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/29 00:51:57 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/29 01:01:40 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ static t_optsdata	g_taropts =
 	}
 };
 
-int main(int argc __attribute__((unused)), char const *argv[])
+int		main(int argc __attribute__((unused)), char const *argv[])
 {
 	t_optparser	data;
 	FILE		*fp;
@@ -63,11 +63,7 @@ int main(int argc __attribute__((unused)), char const *argv[])
 		if (!(fp = fopen((data.argv++)[0], (tar) ? "w" : "r")))
 			return (TAR_ERR("%s", strerror(errno)));
 	}
-	else
-	{
-		if (!(fp = fdopen((tar) ? 1 : 0, (tar) ? "w" : "r")))
-			return (TAR_ERR("%s", strerror(errno)));
-
-	}
+	else if (!(fp = fdopen((tar) ? 1 : 0, (tar) ? "w" : "r")))
+		return (TAR_ERR("%s", strerror(errno)));
 	return ((tar) ? ft_tar(data.argv, fp) : ft_untar(fp));
 }
