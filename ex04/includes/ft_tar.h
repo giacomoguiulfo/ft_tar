@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 05:05:32 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/29 02:25:12 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 19:23:06 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,8 +88,9 @@ int				linkflag(t_tarheader **tar_h, struct stat buf);
 int				add_directory(FILE *destfile, char *filename,
 							t_dstr **prefix);
 int				write_file(FILE *destfile, FILE *src, t_tarheader *tar_h);
-int				add_file(FILE *destfile, char *filename, t_dstr **prefix);
-int				ft_tar(char *argv[], FILE *destfile);
+int				add_file(FILE *destfile, char *filename, t_dstr **prefix,
+						uint8_t verbose);
+int				ft_tar(t_tar *data, FILE *destfile);
 
 /*
 ** unutils.c

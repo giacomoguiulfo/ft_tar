@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 16:43:36 by asyed             #+#    #+#             */
-/*   Updated: 2018/01/29 00:37:45 by gguiulfo         ###   ########.fr       */
+/*   Updated: 2018/01/29 19:25:46 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ int	add_directory(FILE *destfile, char *filename, t_dstr **prefix)
 		ft_dstr_append(*prefix, "/");
 	while ((dir = readdir(name)))
 		if (strcmp(dir->d_name, ".") && strcmp(dir->d_name, ".."))
-			if (!add_file(destfile, dir->d_name, prefix))
+			if (!add_file(destfile, dir->d_name, prefix, 0))
 				return (0);
 	return (1);
 }
@@ -93,12 +93,14 @@ int	write_file(FILE *destfile, FILE *src, t_tarheader *tar_h)
 	return (1);
 }
 
-int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
+int	add_file(FILE *destfile, char *filename, t_dstr **prefix, uint8_t verbose)
 {
+	static int	v_flag = 0;
 	t_tarheader	*tar_h;
 	FILE		*file;
 	char		*new_name;
 
+	v_flag = (verbose) ? 1 : v_flag;
 	if (!(tar_h = calloc(sizeof(t_tarheader), 1)))
 		return (0);
 	if (prefix && *prefix)
@@ -112,6 +114,7 @@ int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
 	if (!strcpy(tar_h->name, new_name) || !(file = fopen(new_name, "r"))
 		|| !add_stats(fileno(file), &tar_h))
 		return (0);
+	(v_flag) ? printf("a %s\n", new_name) : 0;
 	fwrite(tar_h, sizeof(t_tarheader), 1, destfile);
 	if (tar_h->linkflag != '5' && !write_file(destfile, file, tar_h))
 		return (0);
@@ -119,16 +122,19 @@ int	add_file(FILE *destfile, char *filename, t_dstr **prefix)
 	return (linkf_handle(tar_h->linkflag, destfile, prefix, filename));
 }
 
-int	ft_tar(char *argv[], FILE *destfile)
+int	ft_tar(t_tar *data, FILE *destfile)
 {
 	void		*test;
 	int			i;
+	char		**argv;
 
 	i = 0;
+	argv = data->argv;
 	test = NULL;
 	while (argv[i])
 	{
-		if (!add_file(destfile, argv[i++], (t_dstr **)&test))
+		if (!add_file(destfile, argv[i++], (t_dstr **)&test,
+					TAR_HAS_OPT_LV(data->flags)))
 		{
 			printf("%s: Error %s\n", g_argv[0], strerror(errno));
 			return (0);

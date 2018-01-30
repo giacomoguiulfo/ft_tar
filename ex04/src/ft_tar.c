@@ -6,7 +6,7 @@
 /*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/28 23:23:26 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/29 02:23:42 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 19:22:42 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,8 +81,8 @@ int		main(int argc __attribute__((unused)), char const *argv[])
 		return (1);
 	if (TAR_HAS_OPT_LZ(data.flags) && TAR_HAS_OPT_LC(data.flags))
 	{
-		if (!ft_tar(data.argv, fp))
+		if (!ft_tar(&data, fp))
 			return (system(cmd));
 	}
-	return ((tar) ? ft_tar(data.argv, fp) : ft_untar(fp));
+	return ((tar) ? ft_tar(&data, fp) : ft_untar(fp));
 }
