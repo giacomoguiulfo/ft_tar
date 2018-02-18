@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: gguiulfo <gguiulfo@student.42.fr>          +#+  +:+       +#+         #
+#    By: suedadam <suedadam@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/06/20 11:36:52 by gguiulfo          #+#    #+#              #
-#    Updated: 2018/01/29 00:20:05 by gguiulfo         ###   ########.fr        #
+#    Updated: 2018/02/18 03:49:39 by suedadam         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -40,7 +40,7 @@ utils\
 INC_DIR		:= includes/
 OBJ_DIR		:= obj/
 SRC_DIR		:= src/
-LIBFT_DIR	:= ../libft/
+LIBFT_DIR	:= libft/
 LIBFT_INC	:= $(LIBFT_DIR)includes/
 LIBFT_LIB	:= $(LIBFT_DIR)libft.a
 LIBFT_LNK	:= -L libft/ -lft

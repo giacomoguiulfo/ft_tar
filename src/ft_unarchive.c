@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_unarchive.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: asyed <asyed@student.42.fr>                +#+  +:+       +#+        */
+/*   By: suedadam <suedadam@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 23:06:30 by gguiulfo          #+#    #+#             */
-/*   Updated: 2018/01/29 01:03:40 by asyed            ###   ########.fr       */
+/*   Updated: 2018/01/29 01:02:13 by asyed            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,6 @@
 #include <sys/types.h>
 #include <utime.h>
 #include <time.h>
-
-char	**g_argv;
 
 #define FTAR_ERR(s, ...)	((fprintf(stderr, s, ##__VA_ARGS__)) ? 1 : 1)
 #define FTAR_USAGE			"usage: %s archived_file", g_argv[0]
@@ -45,7 +43,6 @@ void	unarchive_file(const char *path, char data[], int size)
 	}
 	fwrite(data, size, sizeof(char), fp);
 	fclose(fp);
-	printf("%s, ", path);
 }
 
 void	ftar_permissions(const char *path, char *data)
@@ -81,11 +78,10 @@ int		file_handle(char *data, size_t offset, size_t file_size, char *buf)
 	{
 		if (-1 == mkdir(buf, 0) && errno != EEXIST)
 			return (FTAR_ERR(FTAR_ERR_MSG2, strerror(errno)));
-		printf("%s, ", buf);
 	}
 	else if (buf[0])
 		return (FTAR_ERR(FTAR_ERR_MSG1));
-	return (1);
+	return (0);
 }
 
 int		ft_unarchive(char *data, size_t archive_size)
@@ -105,8 +101,8 @@ int		ft_unarchive(char *data, size_t archive_size)
 		strncpy(buf, FTAR_FILESIZE(data, offset), 13);
 		file_size = strtoul(buf, (char **)NULL, 8);
 		strncpy(buf, data + offset, 101);
-		if (!file_handle(data, offset, file_size, buf))
-			return (0);
+		if (file_handle(data, offset, file_size, buf))
+			return (1);
 		if (buf[0] && (1 || USER_IS_ROOT))
 			ftar_permissions(buf, data + offset);
 		if (file_size > 0)
@@ -116,17 +112,11 @@ int		ft_unarchive(char *data, size_t archive_size)
 	return (0);
 }
 
-int		main(int argc, char const *argv[])
+int		ft_untar(FILE *fp)
 {
-	FILE	*fp;
 	size_t	archive_size;
 	char	*data;
 
-	g_argv = (char **)argv;
-	if (argc != 2)
-		return (FTAR_ERR(FTAR_USAGE));
-	if (!(fp = fopen(argv[1], "r")))
-		return (FTAR_ERR(FTAR_ERR_MSG, argv[1], strerror(errno)));
 	fseek(fp, 0, SEEK_END);
 	archive_size = ftell(fp);
 	if (archive_size < FTAR_HEADSIZE)
@@ -134,9 +124,7 @@ int		main(int argc, char const *argv[])
 	rewind(fp);
 	data = (char *)malloc(sizeof(char) * archive_size);
 	fread(data, archive_size, sizeof(char), fp);
-	printf("-> Get ");
 	ft_unarchive(data, archive_size);
 	fclose(fp);
-	printf("from %s\n-> done\n", argv[1]);
 	return (0);
 }
